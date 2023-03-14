@@ -1,0 +1,42 @@
+version: '3.4'
+
+networks:
+  backend:
+
+services:
+  categorydb:
+    container_name: category-db
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Pass@word
+    networks:
+      - backend    
+    ports:
+      - "8001:1433"
+  category.api:
+    container_name: category-api
+    image: ${DOCKER_REGISTRY-}categoryapi
+    build:
+      context: .
+      dockerfile: Category.API/Dockerfile
+    networks:
+      - backend
+    ports:
+      - "8002:80"
+    environment:
+      - DB_HOST=categorydb
+      - DB_NAME=category
+      - DB_SA_PASSWORD=Pass@word
+  apigateways:
+    container_name: api-gateway
+    image: ${DOCKER_REGISTRY-}apigateways
+    build:
+      context: .
+      dockerfile: APIGateways/Dockerfile
+    ports:
+        - 8001:80
+    networks:
+        - backend
+
+
